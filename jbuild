@@ -1,0 +1,4 @@
+(library
+ ((name optimal_stack)
+  (libraries (str))
+  (wrapped false)))

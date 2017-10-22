@@ -12,7 +12,7 @@ let one k v =
     Hashtbl.add ht k 0;
     {a; n=1; ht}
   end
-  
+
 let size heap = heap.n
 
 let track heap i =
@@ -30,8 +30,8 @@ let rec heap_up heap i =
       track heap ((i-1)/2);
       heap_up heap ((i-1)/2)
     end
-  end 
-  
+  end
+
 let rec heap_down heap i  =
   if 2*i+2 < heap.n then begin
     if heap.a.(2*i+1) < heap.a.(2*i+2) then begin
@@ -67,7 +67,7 @@ let rec heap_down heap i  =
     else
       ()
   end
-  
+
 let pop heap =
   if heap.n <= 0 then failwith "empty heap";
   let x = heap.a.(0) and n = heap.n in
@@ -77,12 +77,12 @@ let pop heap =
     heap.n <- n - 1;
     track heap 0;
     heap_down heap 0;
-    let (v, k) = x in (k, v) 
+    let (v, k) = x in (k, v)
   end
-  
+
 let mem heap k =
   Hashtbl.mem heap.ht k
-    
+
 let insert heap k v =
   begin
     heap.n <- heap.n + 1;
@@ -92,7 +92,7 @@ let insert heap k v =
     track heap (heap.n-1);
     heap_up heap (heap.n - 1)
   end
-  
+
 let decrease heap k v =
   let i = Hashtbl.find heap.ht k in begin
     if heap.a.(i) > (v, k) then begin
@@ -100,4 +100,3 @@ let decrease heap k v =
       heap_up heap i
     end
   end
-  

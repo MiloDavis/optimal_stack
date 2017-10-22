@@ -1,10 +1,7 @@
-
-
-
+open Parser
 type opcode = DUP | DROP | SWAP | CDR | CAR | PUSH | POP | PAIR | UNPAIR | UNPIAR
-type values = Var of string | Pair of values * values
 type stack = Invalid | Stack of (values list) * (values list)
-                 
+
 let rec run = function
   | ( [ ], s) -> s
   | (   DUP::code, Stack          (h::s, r)) -> run (code, Stack (h::h::s, r))
@@ -27,16 +24,16 @@ let rec opcost = function
 
 type solution = {mutable cost : float; mutable code : opcode list}
 
-module IntSet = Set.Make(struct type t = string let compare = compare end)
+module StringSet = Set.Make(String)
 
-let present_variables x = 
+let present_variables x =
   let rec list_variables = function
     | Stack ((Var a)::s, r)       -> a::(list_variables (Stack (s,r)))
     | Stack ((Pair (a,b))::s, r)  -> list_variables (Stack (a::b::s,r))
     | Stack ([], (Var a)::r)      -> a::(list_variables (Stack ([],r)))
     | Stack ([], (Pair (a,b))::r) -> list_variables (Stack ([],a::b::r))
     | _ -> [] in
-  IntSet.of_list (list_variables x)
+  StringSet.of_list (list_variables x)
 
 (* An admissible heuristic for the cost of reaching sb from sa.
    It must always underestimate the cost
@@ -57,12 +54,12 @@ let heuristic sa sb =
   else begin
     (* rule a *)
     let varB = present_variables sb and varA =  present_variables sa in
-    if not IntSet.(diff varB varA |> is_empty) then
+    if not StringSet.(diff varB varA |> is_empty) then
       maxint
     else (* rule b *)
-      let n = IntSet.(diff varA varB |> cardinal) in n
+      let n = StringSet.(diff varA varB |> cardinal) in n
   end
-        
+
 let optimize sa sb =
   let nodes = Heap.one sa (0 + heuristic sa sb, 0, []) in
   let rec optimize_aux () =
@@ -91,8 +88,10 @@ let optimize sa sb =
 
 (** Example *)
 
+let optimize_strs s1 s2 =
+  optimize (Stack (parse s1, [])) (Stack (parse s2, []))
+
 let example = function () ->
 let a = Var "a" and b = Var "b" and c = Var "c" in
 let start = Stack ([Pair (a, b); c], []) and target = Stack ([Pair (c,a); b], []) in
 optimize start target
-  
